@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% block title %}Face Registration{% endblock %}
+{% block content %}
+<div class="page-head"><div><h4>Face Registration</h4><p>Enrol student faces for recognition.</p></div></div>
+<div class="row g-3">
+ <div class="col-lg-7"><div class="card card-body p-4">
+  <div class="video-wrap"><video id="video" autoplay playsinline muted></video><canvas id="overlay"></canvas></div>
+  <div id="msg" class="alert alert-secondary mt-3 mb-2">Select a student and start the camera.</div>
+  <div class="progress mb-3"><div id="prog" class="progress-bar" style="width:0%">0/8</div></div>
+  <div class="d-flex gap-2"><button id="startBtn" class="btn btn-outline-primary">Start camera</button>
+  <button id="captureBtn" class="btn btn-primary" disabled>Capture 8 samples</button></div>
+ </div></div>
+ <div class="col-lg-5"><div class="card card-body">
+  <label class="form-label">Student</label>
+  <select id="student" class="form-select mb-3">{% for s in students %}<option value="{{ s.id }}">{{ s.student_code }} - {{ s.full_name }} [{{ s.face_status }}]</option>{% endfor %}</select>
+  <div class="d-flex gap-2"><button id="toggleBtn" class="btn btn-sm btn-outline-secondary">Activate / deactivate face</button>
+  <button id="deleteBtn" class="btn btn-sm btn-outline-danger">Delete face data</button></div>
+  <p class="small text-muted mt-3 mb-0">Look straight at the camera, one person only, good lighting. Re-registering replaces existing samples.</p>
+ </div></div>
+</div>
+{% endblock %}
+{% block scripts %}<script src="/static/js/face_registration.js"></script>{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% block title %}Attendance{% endblock %}
+{% block content %}
+<div class="page-head"><div><h4>Attendance History</h4><p>Search, filter and export attendance records.</p></div><a class="btn btn-outline-secondary" href="/attendance/export.csv?{{ request.url.query }}"><i class="bi bi-download me-1"></i>Export CSV</a></div>
+<form class="row g-2 mb-3">
+ <div class="col-md-2"><input name="q" value="{{ f.q }}" class="form-control" placeholder="Student"></div>
+ <div class="col-md-2"><input type="date" name="date_from" value="{{ f.date_from }}" class="form-control"></div>
+ <div class="col-md-2"><input type="date" name="date_to" value="{{ f.date_to }}" class="form-control"></div>
+ <div class="col-md-2"><select name="class_name" class="form-select"><option value="">All classes</option>{% for c in classes %}<option {{ 'selected' if c==f.class_name }}>{{ c }}</option>{% endfor %}</select></div>
+ <div class="col-md-2"><select name="subject" class="form-select"><option value="">All subjects</option>{% for c in subjects %}<option {{ 'selected' if c==f.subject }}>{{ c }}</option>{% endfor %}</select></div>
+ <div class="col-md-1"><select name="status" class="form-select"><option value="">Any</option>{% for c in ['Present','Late'] %}<option {{ 'selected' if c==f.status }}>{{ c }}</option>{% endfor %}</select></div>
+ <div class="col-md-1"><button class="btn btn-primary w-100">Go</button></div></form>
+<div class="card"><div class="table-responsive"><table class="table mb-0"><thead><tr><th>ID</th><th>Name</th><th>Date</th><th>Subject</th><th>Check-in</th><th>Check-out</th><th>Status</th><th>Match distance</th><th>Location</th></tr></thead><tbody>
+{% for a in rows %}<tr><td>{{ a.student.student_code }}</td><td>{{ a.student.full_name }}</td><td>{{ a.session.session_date }}</td><td>{{ a.session.schedule.subject }}</td>
+<td>{{ a.check_in_time.strftime('%I:%M %p') if a.check_in_time else '-' }}</td><td>{{ a.check_out_time.strftime('%I:%M %p') if a.check_out_time else '-' }}</td>
+<td><span class="status-{{ a.status }}">{{ a.status }}</span></td><td>{{ a.recognition_score if a.recognition_score is not none else '-' }}</td><td>{{ a.location or '-' }}</td></tr>
+{% else %}<tr><td colspan="9" class="text-center text-muted py-4">No attendance records match.</td></tr>{% endfor %}</tbody></table></div></div>
+{% endblock %}

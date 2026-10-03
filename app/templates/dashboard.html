@@ -1,0 +1,27 @@
+{% extends "base.html" %}{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="page-head"><div><h4>Dashboard</h4><p>Today's attendance at a glance.</p></div>
+ <a href="/face-attendance" class="btn btn-primary"><i class="bi bi-camera-video me-1"></i>Start attendance</a></div>
+<div class="row g-3 mb-4" id="kpis">
+ {% for id,label,icon,color in [('total_students','Total Students','bi-people-fill','k-blue'),('present_today','Present Today','bi-check-circle-fill','k-green'),('late_today','Late Today','bi-clock-fill','k-amber'),('absent_today','Absent Today','bi-x-circle-fill','k-red'),('leave_today','Leave Today','bi-door-open-fill','k-slate'),('recognition_failures','Recognition Failures','bi-exclamation-triangle-fill','k-red')] %}
+ <div class="col-6 col-md-4 col-xl-2"><div class="card kpi h-100"><div class="card-body"><div class="kpi-icon {{ color }}"><i class="bi {{ icon }}"></i></div><div><div class="value" id="{{ id }}">-</div><div class="label">{{ label }}</div></div></div></div></div>
+ {% endfor %}
+</div>
+<div class="row g-3">
+ <div class="col-lg-7"><div class="card h-100"><div class="card-body p-4"><h6 class="mb-0">Attendance by day</h6><div class="text-muted small mb-3">Last 7 days</div><canvas id="byDay" height="130"></canvas></div></div></div>
+ <div class="col-lg-5"><div class="card h-100"><div class="card-body p-4"><h6 class="mb-0">Today's breakdown</h6><div class="text-muted small mb-3">Present / Late / Absent</div><canvas id="split" height="180"></canvas>
+  <div class="mt-4 pt-3 border-top d-flex justify-content-between align-items-center"><div class="text-muted small">Attendance rate<br>(Present sessions / required)</div><div class="rate-ring" id="rate">-</div></div></div></div></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+Chart.defaults.font.family='Inter,"Segoe UI",sans-serif';Chart.defaults.color="#64748b";
+getJSON("/api/dashboard/stats").then(s=>{
+ for (const k of ["total_students","present_today","late_today","absent_today","leave_today","recognition_failures"]) document.getElementById(k).textContent=s[k];
+ document.getElementById("rate").textContent = s.attendance_rate===null ? "No data" : s.attendance_rate+"%";
+ new Chart(byDay,{type:"bar",data:{labels:s.by_day.map(d=>d.date),datasets:[{label:"Present",data:s.by_day.map(d=>d.present),backgroundColor:"#16a34a",borderRadius:6},{label:"Late",data:s.by_day.map(d=>d.late),backgroundColor:"#f59e0b",borderRadius:6}]},options:{plugins:{legend:{position:"bottom",labels:{usePointStyle:true}}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,ticks:{precision:0},grid:{color:"#eef1f6"}}}}});
+ new Chart(split,{type:"doughnut",data:{labels:["Present","Late","Absent"],datasets:[{data:[s.present_today,s.late_today,s.absent_today],backgroundColor:["#16a34a","#f59e0b","#dc2626"],borderWidth:0}]},options:{cutout:"68%",plugins:{legend:{position:"bottom",labels:{usePointStyle:true}}}}});
+}).catch(e=>toast(e.message,"danger"));
+</script>
+{% endblock %}

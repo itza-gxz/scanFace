@@ -1,0 +1,29 @@
+{% extends "base.html" %}{% block title %}Students{% endblock %}
+{% block content %}
+<div class="page-head"><div><h4>Students</h4><p>Manage student records and face enrolment.</p></div>
+{% if user.role=='admin' %}<button class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#addForm"><i class="bi bi-plus-lg me-1"></i>Add student</button>{% endif %}</div>
+{% if user.role=='admin' %}
+<div class="collapse mb-3" id="addForm"><div class="card card-body">
+<form method="post" action="/students/add" class="row g-2">
+ <div class="col-md-2"><input name="student_code" class="form-control" placeholder="Student ID (ST006)" required></div>
+ <div class="col-md-3"><input name="full_name" class="form-control" placeholder="Full name" required></div>
+ <div class="col-md-2"><select name="gender" class="form-select"><option>Male</option><option>Female</option></select></div>
+ <div class="col-md-3"><input name="email" type="email" class="form-control" placeholder="Email"></div>
+ <div class="col-md-2"><input name="phone" class="form-control" placeholder="Phone"></div>
+ <div class="col-md-3"><input name="class_name" class="form-control" placeholder="Class (IT Year 4A)"></div>
+ <div class="col-md-3"><input name="department" class="form-control" placeholder="Department"></div>
+ <div class="col-md-2"><button class="btn btn-success w-100">Save</button></div>
+</form></div></div>{% endif %}
+<form class="row g-2 mb-3"><div class="col-md-4 col-lg-3"><input name="q" value="{{ q }}" class="form-control" placeholder="Search name or ID"></div>
+<div class="col-md-2"><select name="status" class="form-select"><option value="">All status</option><option value="active" {{ 'selected' if status=='active' }}>Active</option><option value="inactive" {{ 'selected' if status=='inactive' }}>Inactive</option></select></div>
+<div class="col-md-2"><button class="btn btn-outline-secondary">Filter</button></div></form>
+<div class="card"><div class="table-responsive"><table class="table mb-0 align-middle">
+<thead><tr><th>ID</th><th>Name</th><th>Class</th><th>Status</th><th>Face</th>{% if user.role=='admin' %}<th></th>{% endif %}</tr></thead><tbody>
+{% for s in students %}<tr><td class="fw-semibold">{{ s.student_code }}</td><td><div class="d-flex align-items-center gap-2"><span class="avatar">{{ s.full_name[:1]|upper }}</span>{{ s.full_name }}</div></td><td>{{ s.class_name or '-' }}</td><td><span class="pill {{ 'pill-ok' if s.status=='active' else 'pill-mute' }}">{{ s.status|capitalize }}</span></td><td><span class="pill {{ 'pill-ok' if s.face_status|lower in ('active','registered') else 'pill-mute' }}">{{ s.face_status|capitalize }}</span></td>
+{% if user.role=='admin' %}<td class="text-end">
+<form method="post" action="/students/{{ s.id }}/toggle" class="d-inline"><button class="btn btn-sm btn-outline-secondary">{{ 'Deactivate' if s.status=='active' else 'Activate' }}</button></form>
+<form method="post" action="/students/{{ s.id }}/delete" class="d-inline" onsubmit="return confirm('Delete {{ s.full_name }} and all related attendance and face data?')"><button class="btn btn-sm btn-outline-danger">Delete</button></form></td>{% endif %}</tr>
+{% else %}<tr><td colspan="6" class="text-center text-muted py-4">No students found.</td></tr>{% endfor %}
+</tbody></table></div></div>
+<nav class="mt-3"><ul class="pagination">{% for p in range(1,pages+1) %}<li class="page-item {{ 'active' if p==page }}"><a class="page-link" href="?q={{ q }}&status={{ status }}&page={{ p }}">{{ p }}</a></li>{% endfor %}</ul></nav>
+{% endblock %}

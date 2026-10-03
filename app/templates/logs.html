@@ -1,0 +1,5 @@
+{% extends "base.html" %}{% block title %}Activity Logs{% endblock %}
+{% block content %}<div class="page-head"><div><h4>Activity Logs</h4><p>Audit trail of actions in the system.</p></div></div>
+<div class="card"><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Time</th><th>User</th><th>Action</th><th>Description</th></tr></thead><tbody>
+{% for l in rows %}<tr><td>{{ l.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td><td>{{ l.user.username if l.user else '-' }}</td><td>{{ l.action }}</td><td>{{ l.description }}</td></tr>
+{% else %}<tr><td colspan="4" class="text-center text-muted py-4">No activity yet.</td></tr>{% endfor %}</tbody></table></div></div>{% endblock %}

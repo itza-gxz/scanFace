@@ -1,0 +1,23 @@
+{% extends "base.html" %}{% block title %}Schedules{% endblock %}
+{% block content %}
+<div class="page-head"><div><h4>Schedules &amp; Sessions</h4><p>Create class schedules and open attendance sessions.</p></div></div>
+<div class="card card-body mb-3"><form method="post" action="/schedules/add" class="row g-2">
+ <div class="col-md-2"><input type="date" name="date" class="form-control" required></div>
+ <div class="col-md-1"><input type="time" name="start_time" class="form-control" required></div>
+ <div class="col-md-1"><input type="time" name="end_time" class="form-control" required></div>
+ <div class="col-md-2"><input name="class_name" list="cl" class="form-control" placeholder="Class" required><datalist id="cl">{% for c in classes %}<option value="{{ c }}">{% endfor %}</datalist></div>
+ <div class="col-md-2"><input name="subject" class="form-control" placeholder="Subject" required></div>
+ <div class="col-md-2"><input name="lecturer" class="form-control" placeholder="Lecturer"></div>
+ <div class="col-md-1"><input name="room" class="form-control" placeholder="Room"></div>
+ <div class="col-md-1"><input type="number" name="grace" value="15" min="0" max="180" class="form-control" title="Grace period (minutes)"></div>
+ <div class="col-md-2"><input name="department" class="form-control" placeholder="Department"></div>
+ <div class="col-md-2"><button class="btn btn-primary w-100"><i class="bi bi-plus-lg me-1"></i>Add schedule</button></div></form></div>
+<form class="mb-3"><input name="q" value="{{ q }}" class="form-control d-inline" style="max-width:280px" placeholder="Search subject or class"> <button class="btn btn-outline-secondary">Search</button></form>
+<div class="card"><div class="table-responsive"><table class="table mb-0 align-middle">
+<thead><tr><th>Date</th><th>Time</th><th>Class</th><th>Subject</th><th>Room</th><th>Grace</th><th>Session</th><th></th></tr></thead><tbody>
+{% for s in schedules %}{% for ses in s.sessions %}<tr><td>{{ s.date }}</td><td>{{ s.start_time.strftime('%H:%M') }}-{{ s.end_time.strftime('%H:%M') }}</td><td>{{ s.class_name }}</td><td>{{ s.subject }}</td><td>{{ s.room or '-' }}</td><td>{{ ses.grace_period_minutes }} min</td>
+<td><span class="badge {{ 'bg-success' if ses.status=='OPEN' else 'bg-secondary' }}">{{ ses.status }}</span> ({{ ses.records|length }})</td>
+<td class="text-end"><form method="post" action="/sessions/{{ ses.id }}/{{ 'close' if ses.status=='OPEN' else 'open' }}" class="d-inline"><button class="btn btn-sm btn-outline-primary">{{ 'Close' if ses.status=='OPEN' else 'Open' }}</button></form>
+{% if user.role=='admin' %}<form method="post" action="/schedules/{{ s.id }}/delete" class="d-inline" onsubmit="return confirm('Delete this schedule and its attendance?')"><button class="btn btn-sm btn-outline-danger">Delete</button></form>{% endif %}</td></tr>{% endfor %}
+{% else %}<tr><td colspan="8" class="text-center text-muted py-4">No schedules.</td></tr>{% endfor %}</tbody></table></div></div>
+{% endblock %}

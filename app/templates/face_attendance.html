@@ -1,0 +1,24 @@
+{% extends "base.html" %}{% block title %}Face Attendance{% endblock %}
+{% block content %}
+<div class="page-head"><div><h4>Face Attendance</h4><p>Select a session, start the camera and let students check in.</p></div></div>
+{% if not sessions %}<div class="alert alert-warning">No open attendance session. Open one from <a href="/schedules">Schedules</a>.</div>{% else %}
+<div class="row g-3">
+ <div class="col-lg-5"><div class="card card-body"><div class="video-wrap"><video id="video" autoplay playsinline muted></video><canvas id="overlay"></canvas></div>
+  <div class="d-flex gap-2 mt-3"><button id="startBtn" class="btn btn-primary">Start camera</button><button id="stopBtn" class="btn btn-outline-secondary">Stop</button></div></div></div>
+ <div class="col-lg-4"><div class="card card-body">
+  <div id="msg" class="alert alert-secondary">Waiting for camera.</div>
+  <dl class="row mb-0"><dt class="col-5">Student</dt><dd class="col-7" id="r_name">-</dd><dt class="col-5">ID</dt><dd class="col-7" id="r_code">-</dd>
+  <dt class="col-5">Recognition</dt><dd class="col-7" id="r_rec">-</dd><dt class="col-5">Match distance</dt><dd class="col-7" id="r_score">-</dd>
+  <dt class="col-5">Attendance</dt><dd class="col-7" id="r_status">-</dd><dt class="col-5">Check-in</dt><dd class="col-7" id="r_in">-</dd><dt class="col-5">Check-out</dt><dd class="col-7" id="r_out">-</dd></dl>
+  <p class="small text-muted mt-2 mb-0">Threshold {{ threshold }} (lower distance = closer match).</p></div></div>
+ <div class="col-lg-3"><div class="card card-body">
+  <dl class="mb-2"><dt>Date</dt><dd id="d"></dd><dt>Time</dt><dd id="t"></dd></dl>
+  <label class="form-label">Session</label>
+  <select id="session" class="form-select mb-2">{% for s in sessions %}<option value="{{ s.id }}">{{ s.schedule.subject }} - {{ s.schedule.class_name }} ({{ s.schedule.start_time.strftime('%H:%M') }}, grace {{ s.grace_period_minutes }} min)</option>{% endfor %}</select>
+  <label class="form-label">Action</label>
+  <select id="action" class="form-select mb-2"><option value="check-in">Check-in</option><option value="check-out">Check-out</option></select>
+  <div class="small text-muted">GPS prototype: location is sent if the browser allows it. {{ 'Enforced.' if gps else 'Not enforced.' }} It can be spoofed.</div>
+ </div></div>
+</div>{% endif %}
+{% endblock %}
+{% block scripts %}{% if sessions %}<script src="/static/js/attendance.js"></script>{% endif %}{% endblock %}
